@@ -12,6 +12,14 @@ namespace GitDiffSiteUpdater.Models
 
         public string Password { get; set; }
 
+        public string GitPath { get; set; }
+
+        public string ReposPath { get; set; }
+
+        public string Before { get; set; }
+
+        public string After { get; set; }
+
         public static async Task<SiteSettings> LoadAsync(string path)
         {
             try

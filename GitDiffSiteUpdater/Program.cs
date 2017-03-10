@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace GitDiffSiteUpdater
@@ -36,6 +37,7 @@ namespace GitDiffSiteUpdater
                 CreateNoWindow = true,
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
+                StandardOutputEncoding = Encoding.UTF8,
             };
 
             using (var p = Process.Start(pi))
@@ -52,6 +54,10 @@ namespace GitDiffSiteUpdater
                         {
                             await client.Upload(uri, stream);
                         }
+                    }
+                    else
+                    {
+                        Console.WriteLine("#### " + a);
                     }
                 }
             }

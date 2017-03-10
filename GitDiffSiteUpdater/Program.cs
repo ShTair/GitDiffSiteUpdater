@@ -1,6 +1,5 @@
 ﻿using GitDiffSiteUpdater.Models;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
@@ -12,6 +11,8 @@ namespace GitDiffSiteUpdater
         static void Main(string[] args)
         {
             Run(args[0]).Wait();
+            Console.WriteLine("**Finish");
+            Console.ReadLine();
         }
 
         private static async Task Run(string settingsPath)
@@ -25,7 +26,7 @@ namespace GitDiffSiteUpdater
             }
 
             //await SiteSettings.SaveAsync(settingsPath, settings);
-            var client = new FtpClient(settings.UserName, settings.Password);
+            var client = new FtpClient(settings.UserName, settings.Password, new Uri(settings.Base));
 
             var pi = new ProcessStartInfo
             {
@@ -37,8 +38,6 @@ namespace GitDiffSiteUpdater
                 RedirectStandardOutput = true,
             };
 
-            var _ds = new HashSet<string>();
-
             using (var p = Process.Start(pi))
             {
                 string ap;
@@ -48,19 +47,7 @@ namespace GitDiffSiteUpdater
                     var a = Path.Combine(settings.ReposPath, ap.Replace('/', '\\'));
                     if (File.Exists(a))
                     {
-                        var uri = settings.Base + ap;
-                        var d = settings.Base + Path.GetDirectoryName(ap);
-
-                        if (!_ds.Contains(d))
-                        {
-                            _ds.Add(d);
-                            try
-                            {
-                                await client.Ex(d);
-                            }
-                            catch { }
-                        }
-
+                        var uri = new Uri(ap, UriKind.Relative);
                         using (var stream = File.OpenRead(a))
                         {
                             await client.Upload(uri, stream);

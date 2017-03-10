@@ -1,5 +1,6 @@
 ﻿using GitDiffSiteUpdater.Models;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
@@ -36,6 +37,8 @@ namespace GitDiffSiteUpdater
                 RedirectStandardOutput = true,
             };
 
+            var _ds = new HashSet<string>();
+
             using (var p = Process.Start(pi))
             {
                 string ap;
@@ -48,11 +51,15 @@ namespace GitDiffSiteUpdater
                         var uri = settings.Base + ap;
                         var d = settings.Base + Path.GetDirectoryName(ap);
 
-                        try
+                        if (!_ds.Contains(d))
                         {
-                            await client.Ex(d);
+                            _ds.Add(d);
+                            try
+                            {
+                                await client.Ex(d);
+                            }
+                            catch { }
                         }
-                        catch { }
 
                         using (var stream = File.OpenRead(a))
                         {

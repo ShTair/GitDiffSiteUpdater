@@ -61,60 +61,63 @@ namespace GitDiffSiteUpdater
             }
         }
 
-        private async Task CreateDirectory(Uri dir, bool l)
+        private async Task<bool> CreateDirectory(Uri dir, bool l = false)
         {
             var lp = dir.LocalPath;
             if (lp == "/")
             {
                 await ListDirectory(dir);
-                return;
+                return false;
             }
 
             if (_ds.Contains(lp.Remove(lp.Length - 1)))
             {
                 if (l) await ListDirectory(dir);
-                return;
+                return false;
             }
 
             var bd = new Uri(dir, "..");
-            await CreateDirectory(bd, true);
+            var r = await CreateDirectory(bd, true);
 
-            if (_ds.Contains(lp.Remove(lp.Length - 1)))
+            if (!r && _ds.Contains(lp.Remove(lp.Length - 1)))
             {
                 if (l) await ListDirectory(dir);
-                return;
+                return false;
             }
 
             await MakeDirectory(dir);
             _ds.Add(lp.Remove(lp.Length - 1));
+
+            return true;
         }
 
         private async Task<FtpWebResponse> GetResponseAsync(Uri uri, string method)
         {
-            var req = (FtpWebRequest)WebRequest.Create(uri);
-            req.Credentials = _credential;
-            req.Method = method;
-            req.KeepAlive = false;
-            req.UsePassive = true;
-            req.EnableSsl = true;
-
+            var req = CreateRequest(uri, method);
             return (FtpWebResponse)await req.GetResponseAsync();
         }
 
         private async Task<FtpWebResponse> GetResponseAsync(Uri uri, string method, Stream stream)
         {
-            var req = (FtpWebRequest)WebRequest.Create(uri);
-            req.Credentials = _credential;
-            req.Method = method;
-            req.KeepAlive = false;
-            req.UsePassive = true;
-            req.EnableSsl = true;
+            var req = CreateRequest(uri, method);
             using (var dst = await req.GetRequestStreamAsync())
             {
                 await stream.CopyToAsync(dst);
             }
 
             return (FtpWebResponse)await req.GetResponseAsync();
+        }
+
+        private FtpWebRequest CreateRequest(Uri uri, string method)
+        {
+            var req = (FtpWebRequest)WebRequest.Create(uri);
+            req.Credentials = _credential;
+            req.Method = method;
+            req.KeepAlive = false;
+            req.UsePassive = true;
+            req.EnableSsl = true;
+
+            return req;
         }
     }
 }

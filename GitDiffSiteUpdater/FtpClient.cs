@@ -117,6 +117,8 @@ namespace GitDiffSiteUpdater
             req.UsePassive = true;
             req.EnableSsl = true;
 
+            Console.WriteLine($"-> {method} {uri.LocalPath}");
+
             return req;
         }
     }

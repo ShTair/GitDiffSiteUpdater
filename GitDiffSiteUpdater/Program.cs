@@ -45,10 +45,10 @@ namespace GitDiffSiteUpdater
                 string ap;
                 while ((ap = await p.StandardOutput.ReadLineAsync()) != null)
                 {
-                    Console.WriteLine(ap);
                     var a = Path.Combine(settings.ReposPath, ap.Replace('/', '\\'));
                     if (File.Exists(a))
                     {
+                        Console.WriteLine("++ " + ap);
                         var uri = new Uri(ap, UriKind.Relative);
                         using (var stream = File.OpenRead(a))
                         {
@@ -57,8 +57,10 @@ namespace GitDiffSiteUpdater
                     }
                     else
                     {
-                        Console.WriteLine("#### " + a);
+                        Console.WriteLine("-- " + ap);
                     }
+
+                    Console.WriteLine();
                 }
             }
         }

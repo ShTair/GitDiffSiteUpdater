@@ -50,11 +50,15 @@ namespace GitDiffSiteUpdater
             }
         }
 
-        public async Task Upload(Uri uri, Stream stream)
+        public async Task Upload(Uri uri, Stream stream, bool mkd = true)
         {
             var u = new Uri(_base, uri);
-            var d = new Uri(u, ".");
-            await CreateDirectory(d, false);
+
+            if (mkd)
+            {
+                var d = new Uri(u, ".");
+                await CreateDirectory(d, false);
+            }
 
             using (var res = await GetResponseAsync(u, WebRequestMethods.Ftp.UploadFile, stream))
             {

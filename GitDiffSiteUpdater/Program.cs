@@ -46,10 +46,11 @@ namespace GitDiffSiteUpdater
                 while ((ap = await p.StandardOutput.ReadLineAsync()) != null)
                 {
                     var a = Path.Combine(settings.ReposPath, ap.Replace('/', '\\'));
+                    var uri = new Uri(ap, UriKind.Relative);
+
                     if (File.Exists(a))
                     {
                         Console.WriteLine("++ " + ap);
-                        var uri = new Uri(ap, UriKind.Relative);
                         using (var stream = File.OpenRead(a))
                         {
                             await client.Upload(uri, stream);
@@ -58,6 +59,7 @@ namespace GitDiffSiteUpdater
                     else
                     {
                         Console.WriteLine("-- " + ap);
+                        await client.Remove(uri);
                     }
 
                     Console.WriteLine();

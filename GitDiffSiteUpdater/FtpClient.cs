@@ -45,9 +45,7 @@ namespace GitDiffSiteUpdater
 
         public async Task MakeDirectory(Uri uri)
         {
-            using (var res = await GetResponseAsync(uri, WebRequestMethods.Ftp.MakeDirectory))
-            {
-            }
+            using (var res = await GetResponseAsync(uri, WebRequestMethods.Ftp.MakeDirectory)) { }
         }
 
         public async Task Upload(Uri uri, Stream stream, bool mkd = true)
@@ -60,8 +58,24 @@ namespace GitDiffSiteUpdater
                 await CreateDirectory(d, false);
             }
 
-            using (var res = await GetResponseAsync(u, WebRequestMethods.Ftp.UploadFile, stream))
+            using (var res = await GetResponseAsync(u, WebRequestMethods.Ftp.UploadFile, stream)) { }
+        }
+
+        public async Task Remove(Uri uri)
+        {
+            var u = new Uri(_base, uri);
+
+            using (var res = await GetResponseAsync(u, WebRequestMethods.Ftp.DeleteFile)) { }
+
+            var d = new Uri(u, ".");
+            while (true)
             {
+                var l = await ListDirectory(d);
+                if (l.Count != 0) break;
+
+                using (var res = await GetResponseAsync(d, WebRequestMethods.Ftp.RemoveDirectory)) { }
+                d = new Uri(d, "..");
+                if (d.LocalPath == "/") break;
             }
         }
 

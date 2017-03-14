@@ -65,15 +65,21 @@ namespace GitDiffSiteUpdater
         {
             var u = new Uri(_base, uri);
 
-            using (var res = await GetResponseAsync(u, WebRequestMethods.Ftp.DeleteFile)) { }
+            try { using (var res = await GetResponseAsync(u, WebRequestMethods.Ftp.DeleteFile)) { } }
+            catch { }
 
             var d = new Uri(u, ".");
             while (true)
             {
-                var l = await ListDirectory(d);
-                if (l.Count != 0) break;
+                try
+                {
+                    var l = await ListDirectory(d);
+                    if (l.Count != 0) break;
 
-                using (var res = await GetResponseAsync(d, WebRequestMethods.Ftp.RemoveDirectory)) { }
+                    using (var res = await GetResponseAsync(d, WebRequestMethods.Ftp.RemoveDirectory)) { }
+                }
+                catch { }
+
                 d = new Uri(d, "..");
                 if (d.LocalPath == "/") break;
             }
